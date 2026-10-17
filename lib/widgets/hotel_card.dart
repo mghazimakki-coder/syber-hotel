@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../models/hotel.dart';
 import '../screens/hotel_details_screen.dart';
+import 'stay_image.dart';
 
-class HotelCard extends StatelessWidget {
+class HotelCard extends StatefulWidget {
   final Hotel hotel;
 
   const HotelCard({
@@ -12,300 +13,270 @@ class HotelCard extends StatelessWidget {
   });
 
   @override
+  State<HotelCard> createState() => _HotelCardState();
+}
+
+class _HotelCardState extends State<HotelCard> {
+  bool isFavorite = false;
+
+  @override
   Widget build(BuildContext context) {
-    return InkWell(
-      borderRadius: BorderRadius.circular(20),
-
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => HotelDetailsScreen(
-              hotel: hotel,
+    final hotel = widget.hotel;
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(22),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF173B56).withValues(alpha: 0.08),
+              blurRadius: 18,
+              offset: const Offset(0, 7),
             ),
-          ),
-        );
-      },
-
-      child: Card(
-        margin: const EdgeInsets.only(bottom: 16),
-        elevation: 5,
-        shadowColor: Colors.black26,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
+          ],
         ),
-
+        clipBehavior: Clip.antiAlias,
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-
-            // ==========================
+            // =====================================
             // صورة الفندق
-            // ==========================
+            // =====================================
 
-            Stack(
-              children: [
-
-                ClipRRect(
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(20),
-                  ),
-
-                  child: Image.network(
-                    hotel.image,
-                    height: 200,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-
-                    errorBuilder: (
-                      context,
-                      error,
-                      stackTrace,
-                    ) {
-                      return Container(
-                        height: 200,
-                        width: double.infinity,
-                        color: Colors.grey[300],
-                        child: const Icon(
-                          Icons.hotel,
-                          size: 70,
-                          color: Colors.grey,
-                        ),
-                      );
-                    },
-
-                    loadingBuilder: (
-                      context,
-                      child,
-                      loadingProgress,
-                    ) {
-                      if (loadingProgress == null) {
-                        return child;
-                      }
-
-                      return Container(
-                        height: 200,
-                        width: double.infinity,
-                        alignment: Alignment.center,
-                        child: const CircularProgressIndicator(),
-                      );
-                    },
-                  ),
-                ),
-
-                // زر المفضلة
-                Positioned(
-                  top: 12,
-                  right: 12,
-
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-
-                    child: IconButton(
-                      onPressed: () {},
-                      icon: const Icon(
-                        Icons.favorite_border,
-                        color: Colors.red,
+            AspectRatio(
+              aspectRatio: 16 / 9,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  Positioned.fill(
+                    child: Hero(
+                      tag: 'hotel-${hotel.name}',
+                      child: StayImage(
+                        imageUrl: hotel.imageUrl,
+                        fallbackIcon: Icons.hotel,
+                        hotelName: hotel.name,
                       ),
                     ),
                   ),
-                ),
 
-                // التقييم فوق الصورة
-                Positioned(
-                  bottom: 12,
-                  left: 12,
+                  // =====================================
+                  // زر المفضلة
+                  // =====================================
 
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 6,
-                    ),
-
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(
-                          Icons.star,
-                          color: Colors.amber,
-                          size: 18,
-                        ),
-
-                        const SizedBox(width: 4),
-                        Text(
-                          hotel.rating.toString(),
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
+                  Positioned(
+                    top: 16,
+                    right: 16,
+                    child: Container(
+                      width: 44,
+                      height: 44,
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                      ),
+                      child: IconButton(
+                        onPressed: () => setState(() {
+                          isFavorite = !isFavorite;
+                        }),
+                        tooltip: isFavorite ? 'إزالة من المفضلة' : 'إضافة للمفضلة',
+                        icon: AnimatedScale(
+                          scale: isFavorite ? 1.12 : 1,
+                          duration: const Duration(milliseconds: 160),
+                          curve: Curves.easeOut,
+                          child: Icon(
+                            isFavorite ? Icons.favorite : Icons.favorite_border,
+                            color: const Color(0xFFB53B3B),
+                            size: 23,
                           ),
                         ),
-                      ],
+                      ),
                     ),
                   ),
-                ),
-              ],
+
+                  // =====================================
+                  // التقييم على الصورة
+                  // =====================================
+
+                  Positioned(
+                    bottom: 16,
+                    left: 16,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 10,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                              hotel.rating > 0
+                                  ? hotel.rating.toStringAsFixed(1)
+                                  : 'غير مقيّم',
+                              textDirection: hotel.rating > 0
+                                  ? TextDirection.ltr
+                                  : TextDirection.rtl,
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            if (hotel.rating > 0) ...[
+                              const SizedBox(width: 7),
+                              const Icon(
+                                Icons.star,
+                                color: Color(0xFFD4A72C),
+                                size: 20,
+                              ),
+                            ],
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
 
-            // ==========================
+            // =====================================
             // معلومات الفندق
-            // ==========================
+            // =====================================
 
             Padding(
-              padding: const EdgeInsets.all(16),
-
+              padding: const EdgeInsets.fromLTRB(
+                18,
+                16,
+                18,
+                18,
+              ),
               child: Column(
-                crossAxisAlignment:
-                    CrossAxisAlignment.start,
-
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  // =================================
+                  // اسم الفندق والتقييم
+                  // =================================
 
-                  // الاسم + التقييم
                   Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-
+                      // اسم الفندق
                       Expanded(
                         child: Text(
                           hotel.name,
+                          textDirection: TextDirection.ltr,
+                          textAlign: TextAlign.right,
                           style: const TextStyle(
                             fontSize: 21,
                             fontWeight: FontWeight.bold,
+                            color: Color(0xFF171B25),
                           ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
 
-                      Row(
-                        children: [
-                          const Icon(
-                            Icons.star,
-                            color: Colors.amber,
-                            size: 18,
-                          ),
+                      const SizedBox(width: 12),
 
-                          const SizedBox(width: 3),
-
-                          Text(
-                            hotel.rating.toString(),
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
+                      Text(
+                        hotel.rating > 0
+                            ? '${hotel.rating.toStringAsFixed(1)} ★'
+                            : 'غير مقيّم',
+                        textDirection: hotel.rating > 0
+                            ? TextDirection.ltr
+                            : TextDirection.rtl,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF171B25),
+                        ),
                       ),
                     ],
                   ),
 
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 12),
 
+                  // =================================
                   // الموقع
+                  // =================================
+
                   Row(
                     children: [
                       const Icon(
                         Icons.location_on_outlined,
-                        size: 19,
-                        color: Colors.grey,
+                        color: Color(0xFF7A8490),
+                        size: 21,
                       ),
 
-                      const SizedBox(width: 5),
+                      const SizedBox(width: 7),
 
-                      Text(
-                        hotel.location,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          color: Colors.grey,
+                      Expanded(
+                        child: Text(
+                          hotel.location,
+                          textDirection: TextDirection.ltr,
+                          textAlign: TextAlign.right,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            color: Color(0xFF7A8490),
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ],
                   ),
 
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 20),
 
-                  // السعر + زر التفاصيل
-                  Row(
-                    mainAxisAlignment:
-                        MainAxisAlignment.spaceBetween,
+                  // =================================
+                  // السعر وزر التفاصيل
+                  // =================================
 
-                    crossAxisAlignment:
-                        CrossAxisAlignment.center,
-
-                    children: [
-
-                      Column(
-                        crossAxisAlignment:
-                            CrossAxisAlignment.start,
-
-                        children: [
-                          const Text(
-                            'السعر',
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: Colors.grey,
-                            ),
+                  Text(
+                    hotel.price > 0
+                        ? 'تبدأ أسعار الوحدات من ${hotel.price.toStringAsFixed(0)} جنيه سوداني / ليلة'
+                        : 'تحقق من أسعار الوحدات',
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.right,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      height: 1.35,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF173B56),
+                    ),
+                  ),
+                  const SizedBox(height: 13),
+                  SizedBox(
+                    height: 48,
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute<void>(
+                            builder: (_) => HotelDetailsScreen(hotel: hotel),
                           ),
-
-                          const SizedBox(height: 2),
-
-                          Text(
-                            '${hotel.price.toStringAsFixed(0)} جنيه',
-                            style: const TextStyle(
-                              fontSize: 19,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.green,
-                            ),
-                          ),
-
-                          const Text(
-                            'لليلة',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey,
-                            ),
-                          ),
-                        ],
-                      ),
-                      // زر التفاصيل
-                      ElevatedButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  HotelDetailsScreen(
-                                hotel: hotel,
-                              ),
-                            ),
-                          );
-                        },
-
-                        style: ElevatedButton.styleFrom(
-                          padding:
-                              const EdgeInsets.symmetric(
-                            horizontal: 18,
-                            vertical: 12,
-                          ),
-
-                          shape:
-                              RoundedRectangleBorder(
-                            borderRadius:
-                                BorderRadius.circular(12),
-                          ),
-                        ),
-
-                        child: const Text(
-                          'التفاصيل',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                          ),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        elevation: 0,
+                        foregroundColor: Colors.white,
+                        backgroundColor: const Color(0xFF173B56),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
                         ),
                       ),
-                    ],
+                      child: const Text(
+                        'التفاصيل',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
                   ),
                 ],
               ),

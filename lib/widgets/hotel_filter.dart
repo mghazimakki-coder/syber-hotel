@@ -26,20 +26,14 @@ class _HotelFilterState extends State<HotelFilter> {
   void initState() {
     super.initState();
 
-    priceRange = RangeValues(
-      widget.minPrice,
-      widget.maxPrice,
-    );
+    priceRange = RangeValues(widget.minPrice, widget.maxPrice);
 
     rating = widget.selectedRating;
   }
 
   void resetFilter() {
     setState(() {
-      priceRange = RangeValues(
-        widget.minPrice,
-        widget.maxPrice,
-      );
+      priceRange = RangeValues(widget.minPrice, widget.maxPrice);
 
       rating = 0;
     });
@@ -49,47 +43,32 @@ class _HotelFilterState extends State<HotelFilter> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Container(
-        padding: const EdgeInsets.fromLTRB(
-          20,
-          10,
-          20,
-          20,
-        ),
+        padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
         decoration: const BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.vertical(
-            top: Radius.circular(28),
-          ),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
         ),
         child: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-
               // ==============================
               // Header
               // ==============================
-
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Text(
                     'فلترة الفنادق',
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                   ),
 
                   IconButton(
                     onPressed: () {
                       Navigator.pop(context);
                     },
-                    icon: const Icon(
-                      Icons.close,
-                      size: 26,
-                    ),
+                    icon: const Icon(Icons.close, size: 26),
                   ),
                 ],
               ),
@@ -103,23 +82,16 @@ class _HotelFilterState extends State<HotelFilter> {
               // ==============================
               // Price
               // ==============================
-
               const Text(
                 'السعر',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
 
               const SizedBox(height: 8),
 
               Text(
-                '${priceRange.start.round()} - ${priceRange.end.round()} جنيه',
-                style: const TextStyle(
-                  fontSize: 15,
-                  color: Colors.grey,
-                ),
+                '${priceRange.start.round()} - ${priceRange.end.round()} جنيه سوداني',
+                style: const TextStyle(fontSize: 15, color: Colors.grey),
               ),
 
               const SizedBox(height: 5),
@@ -145,13 +117,9 @@ class _HotelFilterState extends State<HotelFilter> {
               // ==============================
               // Rating
               // ==============================
-
               const Text(
                 'التقييم',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
 
               const SizedBox(height: 12),
@@ -159,25 +127,13 @@ class _HotelFilterState extends State<HotelFilter> {
                 spacing: 8,
                 runSpacing: 8,
                 children: [
-                  _ratingButton(
-                    title: 'الكل',
-                    value: 0,
-                  ),
+                  _ratingButton(title: 'الكل', value: 0),
 
-                  _ratingButton(
-                    title: '⭐ 3+',
-                    value: 3,
-                  ),
+                  _ratingButton(title: '⭐ 3+', value: 3),
 
-                  _ratingButton(
-                    title: '⭐ 4+',
-                    value: 4,
-                  ),
+                  _ratingButton(title: '⭐ 4+', value: 4),
 
-                  _ratingButton(
-                    title: '⭐ 4.5+',
-                    value: 4.5,
-                  ),
+                  _ratingButton(title: '⭐ 4.5+', value: 4.5),
                 ],
               ),
 
@@ -186,30 +142,19 @@ class _HotelFilterState extends State<HotelFilter> {
               // ==============================
               // Buttons
               // ==============================
-
               Row(
                 children: [
-
                   // Reset
                   Expanded(
                     child: OutlinedButton(
                       onPressed: resetFilter,
                       style: OutlinedButton.styleFrom(
-                        minimumSize: const Size(
-                          double.infinity,
-                          52,
-                        ),
+                        minimumSize: const Size(double.infinity, 52),
                         shape: RoundedRectangleBorder(
-                          borderRadius:
-                              BorderRadius.circular(14),
+                          borderRadius: BorderRadius.circular(14),
                         ),
                       ),
-                      child: const Text(
-                        'مسح',
-                        style: TextStyle(
-                          fontSize: 16,
-                        ),
-                      ),
+                      child: const Text('مسح', style: TextStyle(fontSize: 16)),
                     ),
                   ),
 
@@ -229,13 +174,9 @@ class _HotelFilterState extends State<HotelFilter> {
                         Navigator.pop(context);
                       },
                       style: ElevatedButton.styleFrom(
-                        minimumSize: const Size(
-                          double.infinity,
-                          52,
-                        ),
+                        minimumSize: const Size(double.infinity, 52),
                         shape: RoundedRectangleBorder(
-                          borderRadius:
-                              BorderRadius.circular(14),
+                          borderRadius: BorderRadius.circular(14),
                         ),
                       ),
                       child: const Text(
@@ -262,10 +203,7 @@ class _HotelFilterState extends State<HotelFilter> {
   // Rating Button
   // ==============================
 
-  Widget _ratingButton({
-    required String title,
-    required double value,
-  }) {
+  Widget _ratingButton({required String title, required double value}) {
     final bool isSelected = rating == value;
 
     return ChoiceChip(

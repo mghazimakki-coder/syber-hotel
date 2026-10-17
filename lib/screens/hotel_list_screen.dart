@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
-
 import '../models/hotel.dart';
+import '../services/auth_service.dart';
+import '../services/hotel_service.dart';
+import 'apartment_list_screen.dart';
+import 'login_screen.dart';
+import 'my_bookings_screen.dart';
 import '../widgets/hotel_card.dart';
-import '../widgets/hotel_filter.dart';
 
 class HotelListScreen extends StatefulWidget {
-  const HotelListScreen({
-    super.key,
-  });
+  const HotelListScreen({super.key});
 
   @override
   State<HotelListScreen> createState() {
@@ -15,224 +16,161 @@ class HotelListScreen extends StatefulWidget {
   }
 }
 
-class _HotelListScreenState
-    extends State<HotelListScreen> {
+class _HotelListScreenState extends State<HotelListScreen> {
+  List<Hotel> hotels = [];
+  bool isLoading = true;
+  String? loadError;
 
-  // ==========================
-  // الفنادق
-  // ==========================
-
-  final List<Hotel> hotels = const [
-    Hotel(
-      name: 'Grand Hotel',
-      location: 'Khartoum',
-      price: 150.0,
-      rating: 4.5,
-      image: 'https://picsum.photos/300',
-    ),
-
-    Hotel(
-      name: 'Royal Hotel',
-      location: 'Omdurman',
-      price: 200.0,
-      rating: 4.0,
-      image: 'https://picsum.photos/301',
-    ),
-
-    Hotel(
-      name: 'Nile Hotel',
-      location: 'Khartoum',
-      price: 300.0,
-      rating: 4.8,
-      image: 'https://picsum.photos/302',
-    ),
-
-    Hotel(
-      name: 'Blue Hotel',
-      location: 'Bahri',
-      price: 100.0,
-      rating: 3.5,
-      image: 'https://picsum.photos/303',
-    ),
-
-    Hotel(
-      name: 'Capital Hotel',
-      location: 'Khartoum',
-      price: 250.0,
-      rating: 4.2,
-      image: 'https://picsum.photos/304',
-    ),
-  ];
-
-  // ==========================
-  // إعدادات الفلتر
-  // ==========================
-
-  double minPrice = 100.0;
-  double maxPrice = 300.0;
-  double selectedRating = 0.0;
-
-  // ==========================
-  // الفنادق بعد الفلترة
-  // ==========================
-
-  List<Hotel> get filteredHotels {
-    return hotels.where((hotel) {
-      final bool priceIsValid =
-          hotel.price >= minPrice &&
-          hotel.price <= maxPrice;
-
-      final bool ratingIsValid =
-          hotel.rating >= selectedRating;
-
-      return priceIsValid && ratingIsValid;
-    }).toList();
+  @override
+  void initState() {
+    super.initState();
+    _loadHotels();
   }
 
-  // ==========================
-  // فتح الفلتر
-  // ==========================
+  Future<void> _loadHotels() async {
+    setState(() {
+      isLoading = true;
+      loadError = null;
+    });
+    try {
+      final loadedHotels = await HotelService.getCustomerHotels();
+      if (!mounted) return;
+      setState(() {
+        hotels = loadedHotels;
+        isLoading = false;
+      });
+    } catch (error) {
+      if (!mounted) return;
+      setState(() {
+        loadError = error.toString();
+        isLoading = false;
+      });
+    }
+  }
 
-  void showFilter() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) {
-        return HotelFilter(
-          minPrice: 100.0,
-          maxPrice: 300.0,
-          selectedRating: selectedRating,
-
-          onApply: (
-            double min,
-            double max,
-            double rating,
-          ) {
-            setState(() {
-              minPrice = min;
-              maxPrice = max;
-              selectedRating = rating;
-            });
-          },
-        );
-      },
+  Future<void> logout() async {
+    await AuthService.signOut();
+    if (!mounted) return;
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const LoginScreen()),
+      (route) => false,
     );
   }
 
-  // ==========================
-  // إعادة الفلتر
-  // ==========================
-
-  void resetFilter() {
-    setState(() {
-      minPrice = 100.0;
-      maxPrice = 300.0;
-      selectedRating = 0.0;
-    });
-  }
-
-  // ==========================
+  // ==========================================
   // الواجهة
-  // ==========================
+  // ==========================================
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'الفنادق',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+    return DefaultTabController(
+      length: 2,
+      child: Directionality(
+        textDirection: TextDirection.rtl,
+        child: Scaffold(
+          backgroundColor: const Color(0xFFF7F5F0),
 
-        centerTitle: true,
+          // ====================================
+          // AppBar
+          // ====================================
+          appBar: AppBar(
+            backgroundColor: const Color(0xFFF7F5F0),
+            elevation: 0,
 
-        actions: [
-          IconButton(
-            onPressed: showFilter,
-            icon: const Icon(
-              Icons.filter_list,
+            centerTitle: false,
+
+            title: const Text(
+              'Syber Hotel',
+              style: TextStyle(
+                fontSize: 23,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF173B56),
+              ),
             ),
-          ),
-        ],
-      ),
-
-      body: Column(
-        children: [
-          // ======================
-          // عدد الفنادق + إعادة
-          // ======================
-
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 10,
-            ),
-
-            child: Row(
-              mainAxisAlignment:
-                  MainAxisAlignment.spaceBetween,
-
-              children: [
-                Text(
-                  '${filteredHotels.length} فندق',
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                TextButton(
-                  onPressed: resetFilter,
-                  child: const Text(
-                    'إعادة الفلتر',
-                  ),
-                ),
+            actions: [
+              IconButton(
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const MyBookingsScreen(),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.receipt_long_outlined),
+                tooltip: 'حجوزاتي',
+              ),
+              IconButton(
+                onPressed: _loadHotels,
+                icon: const Icon(Icons.refresh),
+                tooltip: 'تحديث الفندق',
+              ),
+              IconButton(
+                onPressed: logout,
+                icon: const Icon(Icons.logout),
+                tooltip: 'تسجيل الخروج',
+              ),
+            ],
+            bottom: const TabBar(
+              labelColor: Color(0xFF173B56),
+              unselectedLabelColor: Color(0xFF7A8490),
+              indicatorColor: Color(0xFFD4A72C),
+              indicatorSize: TabBarIndicatorSize.label,
+              dividerColor: Colors.transparent,
+              tabs: [
+                Tab(text: 'الفنادق', icon: Icon(Icons.hotel_outlined)),
+                Tab(text: 'الشقق', icon: Icon(Icons.apartment_outlined)),
               ],
             ),
           ),
 
-          // ======================
-          // قائمة الفنادق
-          // ======================
-
-          Expanded(
-            child: filteredHotels.isEmpty
-                ? const Center(
-                    child: Text(
-                      'لا توجد فنادق مطابقة للفلتر',
-                      style: TextStyle(
-                        fontSize: 18,
-                      ),
+          // ====================================
+          // محتوى الصفحة
+          // ====================================
+          body: TabBarView(
+            children: [
+              isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : loadError != null
+                  ? _HotelLoadError(message: loadError!, onRetry: _loadHotels)
+                  : ListView(
+                      physics: const BouncingScrollPhysics(),
+                      padding: const EdgeInsets.fromLTRB(18, 18, 18, 25),
+                      children: hotels
+                          .map((hotel) => HotelCard(hotel: hotel))
+                          .toList(),
                     ),
-                  )
-                : ListView.builder(
-                    padding:
-                        const EdgeInsets.all(16),
-
-                    itemCount:
-                        filteredHotels.length,
-
-                    itemBuilder:
-                        (context, index) {
-                      final Hotel hotel =
-                          filteredHotels[index];
-
-                      return Padding(
-                        padding:
-                            const EdgeInsets.only(
-                          bottom: 15,
-                        ),
-
-                        child: HotelCard(
-                          hotel: hotel,
-                        ),
-                      );
-                    },
-                  ),
+              ApartmentListScreen(showAppBar: false),
+            ],
           ),
-        ],
+        ),
+      ),
+    );
+  }
+}
+
+class _HotelLoadError extends StatelessWidget {
+  const _HotelLoadError({required this.message, required this.onRetry});
+
+  final String message;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('تعذر تحميل الفندق: $message', textAlign: TextAlign.center),
+            const SizedBox(height: 12),
+            FilledButton.icon(
+              onPressed: onRetry,
+              icon: const Icon(Icons.refresh),
+              label: const Text('إعادة المحاولة'),
+            ),
+          ],
+        ),
       ),
     );
   }
